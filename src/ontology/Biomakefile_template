@@ -1,0 +1,32 @@
+include Makefile
+
+# ----------------------------------------
+# GROUPING
+# ----------------------------------------
+
+# EXPERIMENTAL
+# BIOMAKE REQUIRED
+
+target/%-ALL.tsv: target/%-hp.tsv target/%-mp.tsv
+	cat $^ > $@.tmp && mv $@.tmp $@
+
+target/$(DP)-$(SP).tsv: 
+	wget --no-check-certificate https://build.berkeleybop.org/job/query-pheno-patterns/lastSuccessfulBuild/artifact/upheno/src/patterns/$(DP).$(SP).tsv -O $@.tmp && grep -v ^? $@.tmp | ./util/curiefy-purls.pl > $@
+
+DPS = abnormal morphology abnormalLevel decreasedWeight
+
+sugg: $(patsubst %,target/seed-%.csv,$(DPS))
+
+test-$(A):
+	echo $(bagof X,X=TARGET)
+
+target/seed-$(DP).csv: target/$(DP)-ALL.tsv
+	./util/suggester.pl modules/entity_attribute.csv  target/$(DP)-ALL.tsv > $@.tmp && mv $@.tmp $@
+
+
+
+
+
+#https://build.berkeleybop.org/job/query-pheno-patterns/lastSuccessfulBuild/artifact/upheno/src/patterns/abnormal.hp.tsv
+#pattern-files = $(shell ls *.yaml)
+
